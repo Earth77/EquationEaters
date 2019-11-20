@@ -1,6 +1,7 @@
 package com.goblinstudios.equationeaters.OpenGLRendering;
 
 import com.goblinstudios.equationeaters.GameAssets;
+import com.goblinstudios.equationeaters.Math.TileMap;
 import com.goblinstudios.equationeaters.Math.Vector2f;
 import com.goblinstudios.equationeaters.Math.Vector2i;
 
@@ -12,19 +13,27 @@ import static com.goblinstudios.equationeaters.OpenGLRendering.GameController.mo
 
 public class MovingCharacter {
 
-    enum MoveState {LEFT,DOWN,UP,RIGHT}
+    enum MoveState {LEFT,DOWN,UP,RIGHT, EATING, PREPARETOEAT, STANDSTILL,SICK}
     MoveState movingState = MoveState.DOWN;
 
-    DynamicSprite movingLeft, movingDown, movingUp, movingRight;
+    DynamicSprite movingLeft, movingDown, movingUp, movingRight, eating, prepareToEat, standStill, sick;
     Vector2f position = new Vector2f((91 * deviceWidth / 480) + (2 * 99.6f * deviceWidth / 480), (((800 - 226) * deviceHeight / 800) - (3 * 90.75f * deviceHeight / 800)));
     Vector2f targetPosition = new Vector2f(position.x, position.y);
     LinkedList<Vector2i> pathList = new LinkedList();
     Vector2i tilePosition = new Vector2i(2,3);
     Vector2i frameSize;
     public static boolean arrivedAtDestination = false;
+    public static float eatingTime = 0;
+    public static float eatStamp = 0;
+    public static float sickTime = 0;
+    public static float sickStamp = 0;
 
     public MovingCharacter(int xTile, int yTile) {
+        tilePosition.x = xTile;
+        tilePosition.y = yTile;
         position = calcPosition(new Vector2i(xTile,yTile));
+        targetPosition = position;
+        movingState = MoveState.DOWN;
     }
 
     public void draw(int renderingProgram, double frameNumber, Vector2f position) {
@@ -44,6 +53,34 @@ public class MovingCharacter {
             case DOWN:
                 movingDown.drawFront(renderingProgram, frameNumber, position, -0.02f);
                 break;
+
+            case EATING:
+                eating.drawFront(renderingProgram,frameNumber,position, -0.02f);
+                break;
+
+            case PREPARETOEAT:
+                prepareToEat.drawFront(renderingProgram,frameNumber,position,-0.02f);
+                break;
+
+            case STANDSTILL:
+                standStill.drawFront(renderingProgram,frameNumber,position,-0.02f);
+                break;
+
+            case SICK:
+                sick.drawFront(renderingProgram,frameNumber,position,-0.02f);
+                break;
+
+        }
+
+
+        if (movingState == MoveState.EATING) {
+            System.out.println("es : " + sickStamp + " st : " + GameScreen.sickTime + " st : " + sickTime);
+            eatingTime = (float)(GameScreen.totalTime - eatStamp) / 100;
+        }
+
+        if (movingState == MoveState.SICK) {
+            System.out.println("ss : " + eatStamp + " ct : " + GameScreen.currentTime + " et : " + eatingTime);
+            sickTime = (float)(GameScreen.totalTime - sickStamp) / 100;
         }
     }
 
@@ -56,6 +93,8 @@ public class MovingCharacter {
         }
 
         if (targetPosition.x == position.x && targetPosition.y == position.y) {
+
+            //System.out.println(" state : " + movingState + " -- eat time : " + eatingTime);
 
             if (!pathList.isEmpty()) {
                 pathList.removeFirst();
@@ -70,7 +109,16 @@ public class MovingCharacter {
             } else {
              //   System.out.println("arrive at destination true");
                 arrivedAtDestination = true;
-                movingState = MoveState.DOWN;
+                if (movingState != MoveState.EATING && TileMap.tileList[tilePosition.x][tilePosition.y].activeTile) {
+                    movingState = MoveState.PREPARETOEAT;
+                }
+
+                if (movingState != MoveState.EATING && movingState != MoveState.SICK && movingState != MoveState.PREPARETOEAT || eatingTime > 0.8f && movingState == MoveState.EATING|| !(TileMap.tileList[tilePosition.x][tilePosition.y].activeTile) && eatingTime > 0.8f || (TileMap.tileList[tilePosition.x][tilePosition.y].eatenTile) && eatingTime > 0.8f || sickTime > 0.8f && movingState == MoveState.SICK) {
+                    //System.out.println("set state down : " + movingState + " - et - " + eatingTime);
+                    movingState = MoveState.DOWN;
+                } else{
+                    System.out.println("eating");
+                }
             }
         }
 
@@ -97,6 +145,7 @@ public class MovingCharacter {
         if (position.y - targetPosition.y >= 1) {
             arrivedAtDestination = false;
             position.y -= (GameAssets.deviceWidth / 256) * deltaTime;
+            System.out.println("set state down 1");
             movingState = MoveState.DOWN;
             if (position.y - targetPosition.y < 1) {
                 position.y = targetPosition.y;
@@ -113,20 +162,21 @@ public class MovingCharacter {
                 tilePosition = calcTilePosition(position);
             }
         }
+
     }
 
     public Vector2f calcPosition(Vector2i posIn) {
         Vector2f newPos = new Vector2f(0,0);
-        newPos.x = ((91 * GameAssets.deviceWidth / 480) + (posIn.x * 99.6f * GameAssets.deviceWidth / 480));
-        newPos.y = (((800 - 226) * GameAssets.deviceHeight / 800) - (posIn.y * 90.75f * GameAssets.deviceHeight / 800));
+        newPos.x = ((81 * GameAssets.deviceWidth / 480) + (posIn.x * 109f * GameAssets.deviceWidth / 480));
+        newPos.y = (((800 - 166) * GameAssets.deviceHeight / 800) - (posIn.y * 107.5f * GameAssets.deviceHeight / 800));
         System.out.println("calc x : " + newPos.x + " -- y " + newPos.y);
         return newPos;
     }
 
     public Vector2i calcTilePosition(Vector2f tilePos) {
         Vector2i newPos = new Vector2i(0,0);
-        newPos.x = Math.round((tilePos.x - (91 * GameAssets.deviceWidth / 480)) / (99.6f * GameAssets.deviceWidth / 480));
-        newPos.y = Math.round((((800 - 226) * GameAssets.deviceHeight / 800) - tilePos.y) / (90.75f * GameAssets.deviceHeight / 800));
+        newPos.x = Math.round((tilePos.x - (81 * GameAssets.deviceWidth / 480)) / (109 * GameAssets.deviceWidth / 480));
+        newPos.y = Math.round((((800 - 166) * GameAssets.deviceHeight / 800) - tilePos.y) / (107.5f * GameAssets.deviceHeight / 800));
         System.out.println("new pos : " + newPos.x + " --- " + newPos.y + "path list -- " + pathList.size());
         return newPos;
     }

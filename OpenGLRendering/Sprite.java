@@ -55,6 +55,7 @@ public class Sprite {
         size.y = sizeIn.y;
         texCoordsToRender = texCoordIn;
         textureWidth = textureWidthIn;
+        textureHeight = textureWidthIn;
         renderable = renderableIn;
         calculateTex();
         texCoords = spriteCoords.getCoords();
@@ -68,6 +69,7 @@ public class Sprite {
         size.y = sizeY;
         textureID = texID;
         textureWidth = textureWidthIn;
+        textureHeight = textureWidthIn;
         rotation = rot;
         reflectedX = refX;
         reflectedY = refY;

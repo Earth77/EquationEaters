@@ -1,5 +1,6 @@
 package com.goblinstudios.equationeaters;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -51,7 +52,15 @@ public class GameAssets {
     public static int fontTextureWidth = 128;
     public static int fontTextureHeight = 128;
 
+    public static int bigFontTexture = 1;
+    public static int bigFontTextureWidth = 512;
+    public static int bigFontTextureHeight = 512;
+
     public static OpenGLView openGLView;
+
+    public static GameActivity gameActivity;
+
+    public static int themeSelected = 1;
 
     public static void loadBaseAssets(Context context) {
 
@@ -61,6 +70,7 @@ public class GameAssets {
         simpleBoxTexture = loadTexture(context, R.drawable.simplebox);
         firstCharTexture = loadTexture(context, R.drawable.testchar);
         fontTexture = loadTexture(context, R.drawable.font);
+        bigFontTexture = loadTexture(context, R.drawable.fontbig);
     }
 
     static int loadTexture(final Context context, final int resourceId)
@@ -140,5 +150,9 @@ public class GameAssets {
     {
         InputStream inputStream = ctx.getResources().openRawResource(resId);
         return inputStream;
+    }
+
+    public static void setActivityContext(GameActivity ctxIn) {
+        gameActivity = ctxIn;
     }
 }

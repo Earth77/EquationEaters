@@ -25,13 +25,13 @@ public class StartScreen extends OpenGLRenderer {
 
     @Override
     public void onDrawFrame(GL10 gl10) {
-        GLES30.glClearColor(0.34f, 0.34f, 0.67f, 0);
+        GLES30.glClearColor(19.0f / 255.0f, 189.0f / 225.0f, 103.0f / 225.0f, 0);
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
   //      System.out.println("using program shader int : " + shaderInt);
         GLES30.glUseProgram(shaderInt);
         GLES30.glEnable(GLES30.GL_BLEND);
         GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA);
-        openingScreen.drawNarrow(shaderInt,0,new Vector2f(GameAssets.deviceWidth / 2,GameAssets.deviceHeight / 2), GameAssets.deviceWidth, GameAssets.deviceHeight);
+//        openingScreen.drawNarrow(shaderInt,0,new Vector2f(GameAssets.deviceWidth / 2,GameAssets.deviceHeight / 2), GameAssets.deviceWidth, GameAssets.deviceHeight);
     }
 
 }
